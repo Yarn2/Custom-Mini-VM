@@ -36,6 +36,7 @@ mem = bytearray(0xFFFF)
 
 
 
+
 #declaring opcode self explanatory
 opcode = mem[CPU.IP]
 
@@ -77,11 +78,25 @@ while CPU.HALT == False:
         combined = (hi << 8) + lo     #shifts the hi value 8 binary bits to the left and adds the lo value to make the 16bit value from two 8 bits
         setattr(CPU, dest, combined)
         IP += 0x0004
-    elif opcode == 0x03: #MOV_REG_REG takes a register as a destination and then takes another register and then copies the second registers contents into the first
-        dest = reg_conv(mem[CPU.IP + 1])
-        source = reg_conv(mem[CPU.IP + 2])
-        source_name = getattr(CPU, source)
-        setattr(CPU, dest, source_name)
+    elif opcode == 0x03:                        #MOV_REG_REG takes a register as a destination and then takes another register and then copies the second registers contents into the first
+        dest = reg_conv(mem[CPU.IP + 1])        #destination register
+        source = reg_conv(mem[CPU.IP + 2])      #contents being copied
+        source_contents = getattr(CPU, source)  #variable to get the contents
+        setattr(CPU, dest, source_contents)     #transfer the contents of source_name to the destination register
+    elif opcode == 0x04:                            #ADD_REG_REG gets a destination register and then a second register called source, adds them togetehr and stores in the dest register
+        dest = reg_conv(mem[CPU.IP + 1])            #dest register
+        dest_contents = getattr(CPU, dest)          #contents of the dest register
+        source = reg_conv(mem[CPU.IP + 2])          #source register
+        source_contents = getattr(CPU, source)      #contents of the source register
+        add_sum = source_contents + dest_contents   #add_sum to be the sum of both contents added together 
+        setattr(CPU, dest, (add_sum & 0xFFFF))      #setting dest register contents to be the addition sum (add_sum) binary & 0xFFFF to concatenate any overflow so im sticking to the 16 bit limit
+
+        if add_sum // 0xFFFF == 1 and add_sum / 0xFFFF != 1:    #checks if there is a remainder in add_sum and the 16bit limit and then sets carry flag to true if it is    
+            CPU.FLAGS.C = True
+
+        
+        
+        
        
         
         
